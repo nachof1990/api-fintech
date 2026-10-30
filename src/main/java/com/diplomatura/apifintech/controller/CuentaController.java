@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.net.URI;
 import java.util.List;
+import com.diplomatura.apifintech.dto.ActualizarCuentaRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 
 /**
  * Recibe solicitudes HTTP de cuentas y delega su resolución al servicio.
@@ -143,5 +145,97 @@ public class CuentaController {
         URI ubicacion = URI.create("/cuentas/" + creada.getId());
 
         return ResponseEntity.created(ubicacion).body(creada);
+    }
+    /**
+     * Actualiza la representación editable de la cuenta: su alias.
+     *
+     * @param id identificador de la cuenta
+     * @param solicitud nuevo alias
+     * @return datos de la cuenta actualizada
+     */
+    @Operation(
+            summary = "Actualizar el alias de una cuenta",
+            description = """
+                    El cuerpo contiene el alias que debe quedar en la cuenta.
+                    Puede conservarse el alias actual.
+                    No se modifican saldo, CBU, número ni titular.
+                    """
+    )
+    @ApiResponse(responseCode = "200", description = "Cuenta actualizada")
+    @ApiResponse(
+            responseCode = "400",
+            description = "Id o alias inválido",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "La cuenta no existe",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "409",
+            description = "Alias ocupado o conflicto de integridad",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @PutMapping("/{id}")
+    public CuentaResponse actualizarCuenta(
+            @PathVariable Long id,
+            @RequestBody ActualizarCuentaRequest solicitud) {
+
+        return cuentaService.actualizarCuenta(id, solicitud);
+    }
+
+    /**
+     * Elimina una cuenta sin saldo.
+     *
+     * @param id identificador de la cuenta
+     * @return respuesta 204 sin cuerpo
+     */
+    @Operation(
+            summary = "Eliminar una cuenta",
+            description = "Elimina físicamente la cuenta si su saldo es cero."
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "Cuenta eliminada; respuesta sin cuerpo",
+            content = @Content
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Id inválido",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "La cuenta no existe",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "409",
+            description = "La cuenta conserva saldo o existe un conflicto de integridad",
+            content = @Content(
+                    mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)
+            )
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCuenta(@PathVariable Long id) {
+        cuentaService.eliminarCuenta(id);
+        return ResponseEntity.noContent().build();
     }
 }

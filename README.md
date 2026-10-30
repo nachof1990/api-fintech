@@ -3,8 +3,9 @@
 Trabajo práctico de la Diplomatura en Desarrollo de Software FinTech:
 IA y Microservicios.
 
-API REST para gestionar usuarios y cuentas bancarias con persistencia
-en MySQL. Incluye consulta del dólar oficial mediante DolarAPI.
+API REST desarrollada con Java y Spring Boot para gestionar usuarios
+y cuentas bancarias, persistir información en MySQL y consultar la
+cotización del dólar oficial mediante una API externa.
 
 ## Tecnologías
 
@@ -13,20 +14,19 @@ en MySQL. Incluye consulta del dólar oficial mediante DolarAPI.
 - Spring Web MVC.
 - Spring Data JPA e Hibernate.
 - MySQL.
-- JUnit Jupiter, Mockito y herramientas de pruebas de Spring.
-- springdoc-openapi 3.2.0 y Swagger UI.
 - Maven Wrapper.
+- JUnit Jupiter y Mockito.
+- MockRestServiceServer y MockMvc.
+- springdoc-openapi 3.2.0 y Swagger UI.
 
-## Requisitos de ejecución
+## Requisitos
 
 - JDK 21.
-- MySQL iniciado y accesible en 127.0.0.1:3306.
+- MySQL iniciado y accesible en `127.0.0.1:3306`.
 - Base de datos `fintech`.
 - Usuario MySQL `fintech_app` con acceso a esa base.
+- Variable de entorno `DB_PASSWORD` con la contraseña local del usuario.
 - Conexión a Internet para descargar dependencias y consultar DolarAPI.
-
-La configuración utiliza estos permisos sobre `fintech.*`:
-SELECT, INSERT, UPDATE, DELETE, CREATE, REFERENCES, INDEX y ALTER.
 
 La base puede crearse desde una conexión administradora de MySQL:
 
@@ -35,69 +35,131 @@ CREATE DATABASE IF NOT EXISTS fintech
 CHARACTER SET utf8mb4;
 ```
 
-El usuario `fintech_app` y sus permisos deben prepararse localmente.
-La contraseña no se incluye en el repositorio.
+El usuario `fintech_app` debe prepararse localmente con estos permisos
+sobre `fintech.*`:
+
+```text
+SELECT, INSERT, UPDATE, DELETE, CREATE, REFERENCES, INDEX, ALTER
+```
+
+La contraseña real no se incluye en el repositorio.
+
+## Descargar el proyecto
+
+```powershell
+git clone https://github.com/nachof1990/api-fintech.git
+cd api-fintech
+```
 
 ## Configuración
 
-La aplicación utiliza `src/main/resources/application.properties`.
+El archivo de configuración es:
 
-La conexión predeterminada es:
+```text
+src/main/resources/application.properties
+```
 
-- URL: `jdbc:mysql://127.0.0.1:3306/fintech`
-- Usuario: `fintech_app`
-- Contraseña: variable de entorno `DB_PASSWORD`
-
-La variable debe estar disponible en el proceso que ejecute la
-aplicación o los tests.
-
-Se utiliza `spring.jpa.hibernate.ddl-auto=update` para actualizar el
-esquema durante el desarrollo y `spring.jpa.open-in-view=false`.
-
-Proveedor de cotizaciones:
+La conexión utiliza:
 
 ```properties
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/fintech
+spring.datasource.username=fintech_app
+spring.datasource.password=${DB_PASSWORD}
+```
+
+Otras decisiones de configuración:
+
+```properties
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.open-in-view=false
 cotizacion.api.base-url=https://dolarapi.com
 ```
 
-## Ejecutar desde IntelliJ
+Hibernate actualiza el esquema durante el desarrollo. La conversión
+de cuentas a DTO se realiza dentro del servicio transaccional.
 
-1. Clonar o descargar el repositorio y abrir la carpeta que contiene
-   `pom.xml`.
-2. Configurar el proyecto con JDK 21 y cargar las dependencias Maven.
-3. En la configuración de ejecución de `ApiFintechApplication`,
-   agregar la variable de entorno `DB_PASSWORD` con la contraseña local
+## Ejecutar desde IntelliJ IDEA
+
+1. Abrir la carpeta que contiene `pom.xml`.
+2. Seleccionar JDK 21 y cargar las dependencias Maven.
+3. Abrir la configuración de ejecución de `ApiFintechApplication`.
+4. Agregar la variable de entorno `DB_PASSWORD` con la contraseña local
    de `fintech_app`.
-4. Mantener esa configuración local, sin guardarla como archivo del
-   proyecto.
-5. Ejecutar `ApiFintechApplication`.
+5. Mantener desmarcada la opción `Store as project file` para esa
+   configuración que contiene la contraseña.
+6. Asegurarse de que MySQL esté iniciado.
+7. Ejecutar `ApiFintechApplication`.
 
-La aplicación utiliza el puerto 8080.
+La aplicación utiliza el puerto `8080`.
 
 ## Ejecutar desde PowerShell
 
-Abrir una terminal en la carpeta que contiene `pom.xml`.
+Abrir una terminal en la raíz del proyecto.
 
-Cargar la contraseña local sin escribirla como texto visible:
+Cargar la contraseña mediante una entrada oculta:
 
 ```powershell
 $claveLocal = Read-Host "Contraseña de fintech_app" -AsSecureString
 $env:DB_PASSWORD = ([System.Net.NetworkCredential]::new("", $claveLocal)).Password
 ```
 
-Ejecutar:
+Iniciar la aplicación:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
 La variable configurada en IntelliJ no se transfiere automáticamente
-a una terminal independiente.
+a una terminal independiente. Debe estar disponible en el proceso
+que ejecute la aplicación o los tests.
+
+## Estructura del proyecto
+
+```text
+api-fintech/
+├── .mvn/
+├── postman/
+│   └── fintech.postman_collection.json
+├── src/
+│   ├── main/
+│   │   ├── java/com/diplomatura/apifintech/
+│   │   │   ├── config/
+│   │   │   ├── controller/
+│   │   │   ├── dto/
+│   │   │   ├── exception/
+│   │   │   ├── model/
+│   │   │   ├── repository/
+│   │   │   ├── service/
+│   │   │   └── ApiFintechApplication.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+│       └── java/com/diplomatura/apifintech/
+│           ├── controller/
+│           ├── model/
+│           ├── service/
+│           └── ApiFintechApplicationTests.java
+├── .gitignore
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── README.md
+```
+
+| Paquete | Responsabilidad |
+|---|---|
+| `config` | Configuración del cliente HTTP de cotizaciones |
+| `controller` | Recepción de solicitudes y respuestas HTTP |
+| `dto` | Datos de entrada y salida de la API |
+| `exception` | Excepciones propias y manejo global de errores |
+| `model` | Entidades, herencia y reglas del dominio |
+| `repository` | Acceso a la base de datos mediante JPA |
+| `service` | Coordinación de operaciones y validaciones |
 
 ## Modelo de dominio
 
-Un usuario puede tener varias cuentas. Cada cuenta tiene un único
-usuario titular:
+Un usuario puede tener varias cuentas. Cada cuenta pertenece a un
+único titular:
 
 ```text
 Usuario (1) ───── (N) Cuenta
@@ -105,24 +167,58 @@ Usuario (1) ───── (N) Cuenta
                        └── CuentaCorriente
 ```
 
-- `Cuenta` es abstracta.
-- Las hijas implementan `retirar()` y `getTipo()`.
-- La caja de ahorro no permite retirar más que el saldo disponible.
-- La cuenta corriente permite utilizar su límite de descubierto.
-- Ambas requieren saldo inicial no negativo.
-- Las cuentas se crean en moneda ARS y estado ACTIVA.
-- Los retiros requieren una cuenta activa.
-- El saldo se modifica mediante operaciones del dominio, sin setter
-  público.
+La relación es unidireccional desde `Cuenta` hacia `Usuario`.
 
-La herencia se persiste con estrategia JOINED:
+`Cuenta` es una clase abstracta. Sus hijas implementan `retirar()`
+y `getTipo()`, aplicando polimorfismo.
+
+### Caja de ahorro
+
+- No permite retirar más que el saldo disponible.
+- No tiene límite de descubierto.
+- En la respuesta, `limiteDescubierto` es `null`.
+
+### Cuenta corriente
+
+- Permite retirar utilizando el saldo y el límite de descubierto.
+- Puede quedar con saldo negativo después de un retiro, hasta el
+  límite permitido.
+- El saldo inicial debe ser no negativo.
+
+### Reglas comunes
+
+- Importes representados con `BigDecimal`.
+- Cuenta nueva en moneda `ARS` y estado `ACTIVA`.
+- Fecha de alta asignada por la aplicación.
+- Titular existente obligatorio.
+- Retiros permitidos únicamente en cuentas activas.
+- Saldo privado, sin setter público.
+- CBU, alias y número de cuenta únicos.
+- Actualización del alias sin modificar los demás datos.
+- Eliminación física permitida únicamente con saldo cero.
+
+Los estados definidos son `ACTIVA`, `BLOQUEADA` y `CERRADA`.
+No se implementaron operaciones para cambiar entre esos estados.
+
+## Persistencia
+
+La herencia utiliza la estrategia JPA `JOINED`.
+
+Tablas:
 
 - `usuarios`
 - `cuentas`
 - `cajas_de_ahorro`
 - `cuentas_corrientes`
 
-La relación es unidireccional desde Cuenta hacia Usuario.
+Los importes se almacenan en columnas `DECIMAL(19,2)`.
+
+La tabla `cuentas` tiene restricciones únicas para CBU, alias y número.
+Estas restricciones complementan las comprobaciones del servicio y
+protegen frente a solicitudes simultáneas.
+
+No hay carga automática de datos iniciales. Los usuarios y cuentas
+se crean mediante la API.
 
 ## Endpoints
 
@@ -131,17 +227,24 @@ La relación es unidireccional desde Cuenta hacia Usuario.
 | GET | `/usuarios` | Lista usuarios |
 | POST | `/usuarios` | Crea un usuario |
 | GET | `/usuarios/{id}` | Busca un usuario |
-| GET | `/cuentas` | Lista ambos tipos de cuentas |
+| GET | `/cuentas` | Lista cuentas |
 | POST | `/cuentas` | Crea una cuenta |
 | GET | `/cuentas/{id}` | Busca una cuenta |
+| PUT | `/cuentas/{id}` | Actualiza el alias |
+| DELETE | `/cuentas/{id}` | Elimina una cuenta con saldo cero |
 | GET | `/cotizaciones/dolar/oficial` | Consulta el dólar oficial |
 
-## Crear usuarios y cuentas
+## Ejemplos de uso
 
-Primero debe existir un usuario. El id obtenido al crearlo se utiliza
-como `usuarioId` al crear una cuenta.
+Dirección base:
 
-Ejemplo de usuario:
+```text
+http://localhost:8080
+```
+
+### Crear un usuario
+
+`POST /usuarios`
 
 ```json
 {
@@ -153,7 +256,15 @@ Ejemplo de usuario:
 }
 ```
 
-Ejemplo de caja de ahorro, suponiendo que el usuario creado tiene id 1:
+Respuesta esperada: `201 Created`, con el usuario creado y la cabecera
+`Location`.
+
+El id recibido se utiliza como `usuarioId` al crear cuentas.
+Los ejemplos siguientes suponen que el usuario tiene id `1`.
+
+### Crear una caja de ahorro
+
+`POST /cuentas`
 
 ```json
 {
@@ -166,123 +277,258 @@ Ejemplo de caja de ahorro, suponiendo que el usuario creado tiene id 1:
 }
 ```
 
-Para cuenta corriente, usar el tipo `CUENTA_CORRIENTE` y agregar
-`limiteDescubierto` con un importe no negativo.
+### Crear una cuenta corriente
 
-El id, la fecha de alta, la moneda y el estado no se envían al crear
-una cuenta. Los asignan la base o la aplicación.
+`POST /cuentas`
 
-El POST exitoso devuelve 201 Created, el recurso creado y la cabecera
-Location con su ruta de consulta.
+```json
+{
+  "tipo": "CUENTA_CORRIENTE",
+  "numeroCuenta": "000002",
+  "alias": "ana.corriente.tp",
+  "cbu": "0000000000000000000002",
+  "saldoInicial": 2000.00,
+  "usuarioId": 1,
+  "limiteDescubierto": 500.00
+}
+```
+
+El límite no se suma al saldo: ambos valores se devuelven por separado.
+
+Los datos de estos ejemplos son ficticios. El id, la fecha de alta,
+la moneda y el estado no se envían al crear una cuenta.
+
+Ambas creaciones exitosas devuelven `201 Created`, los datos de la
+cuenta y una cabecera `Location` con su ruta de consulta.
+
+### Actualizar una cuenta
+
+`PUT /cuentas/{id}`
+
+Reemplazar `{id}` por el identificador de la cuenta.
+
+```json
+{
+  "alias": "ana.alias.actualizado"
+}
+```
+
+Respuesta esperada: `200 OK`, con los datos de la cuenta actualizada.
+
+La representación editable contiene únicamente el alias:
+
+- Puede conservarse el alias actual.
+- El alias no puede ser nulo ni estar en blanco.
+- No puede pertenecer a otra cuenta.
+- No se modifican saldo, CBU, número ni titular.
+
+### Eliminar una cuenta
+
+`DELETE /cuentas/{id}`
+
+La solicitud no lleva cuerpo.
+
+- Saldo cero: `204 No Content`, sin cuerpo.
+- Saldo distinto de cero: `409 Conflict`.
+- Cuenta inexistente: `404 Not Found`.
+
+El borrado es físico. Elimina la cuenta, pero conserva al usuario y sus
+otras cuentas. Repetir el DELETE de una cuenta eliminada devuelve 404.
 
 ## Validaciones y errores
 
-Las respuestas de errores gestionados usan `ProblemDetail`.
+Las respuestas de errores gestionados utilizan `ProblemDetail`.
 
-- 400: datos inválidos, como id no positivo, CBU con formato incorrecto,
-  saldo inicial negativo o límite de descubierto negativo.
-- 404: cuenta o usuario inexistente.
-- 409: CBU, alias o número de cuenta repetido, o conflicto de integridad
-  detectado por la base.
-- 503: no fue posible obtener una cotización completa.
+| Estado | Situaciones |
+|---|---|
+| 400 Bad Request | Id no positivo, datos obligatorios ausentes, CBU con formato inválido, alias en blanco, saldo inicial o descubierto negativos |
+| 404 Not Found | Cuenta o usuario inexistente |
+| 409 Conflict | Identificadores duplicados, eliminación con saldo distinto de cero o conflicto de integridad de datos |
+| 503 Service Unavailable | Fallo al obtener la cotización o respuesta incompleta del proveedor |
 
 El CBU se valida por formato de 22 dígitos. No se valida su dígito
 verificador bancario.
 
-CBU, alias y número tienen comprobaciones previas en el servicio y
-restricciones de unicidad en MySQL.
+Los identificadores bancarios se reciben como texto para conservar
+sus ceros iniciales.
 
 ## Cotización externa
 
-Se consulta:
+Se consulta el dólar oficial mediante DolarAPI:
 
 https://dolarapi.com/v1/dolares/oficial
 
-La integración utiliza RestClient, un tiempo de conexión de 5 segundos
-y un tiempo de espera de respuesta de 10 segundos.
+La respuesta incluye:
 
-Los fallos del cliente HTTP se tratan con un try/catch específico y una
-excepción propia. Los precios y la fecha corresponden a lo informado
-por el proveedor.
+- Moneda y mercado.
+- Nombre de la cotización.
+- Precio de compra.
+- Precio de venta.
+- Fecha de actualización del proveedor.
 
-## Documentación interactiva
+La integración utiliza `RestClient` con:
+
+- Tiempo de conexión de 5 segundos.
+- Tiempo de espera de respuesta de 10 segundos.
+
+Un `try/catch` específico transforma los fallos del cliente HTTP en
+`CotizacionNoDisponibleException`. El manejador global responde con 503.
+
+Los precios y la fecha corresponden al proveedor y pueden cambiar
+entre consultas. La cotización no se persiste en MySQL.
+
+## Swagger y OpenAPI
 
 Con la aplicación iniciada:
 
 - Swagger UI: http://localhost:8080/swagger-ui/index.html
 - OpenAPI JSON: http://localhost:8080/v3/api-docs
 
-Los endpoints se organizan en Usuarios, Cuentas y Cotizaciones.
+La documentación organiza los nueve endpoints en:
+
+- Usuarios.
+- Cuentas.
+- Cotizaciones.
+
+Incluye descripciones, parámetros, cuerpos de entrada y respuestas
+de éxito y error. Los POST documentan la cabecera `Location`.
 
 ## Tests
 
-Ejecutar desde PowerShell con `DB_PASSWORD` configurada:
+La suite contiene 26 tests:
+
+| Grupo | Cantidad |
+|---|---:|
+| Lógica de caja de ahorro y cuenta corriente | 4 |
+| Consulta y creación de cuentas | 8 |
+| Actualización y eliminación de cuentas | 8 |
+| Servicio de cotización | 4 |
+| Controlador de cotización y respuesta 503 | 1 |
+| Carga del contexto de Spring | 1 |
+| Total | 26 |
+
+Se utilizan entidades reales y dependencias simuladas según el
+escenario de prueba.
+
+Los tests comprueban, entre otros casos:
+
+- Retiros con saldo y descubierto.
+- Búsquedas inexistentes.
+- Creación de ambos tipos de cuenta.
+- Solicitudes rechazadas que no deben guardarse.
+- Duplicados de CBU, alias y número.
+- Actualización de alias y conservación del alias propio.
+- Eliminación con saldo cero y rechazo de cuentas con saldo.
+- Respuestas externas válidas, incompletas, vacías y fallidas.
+- Conversión del error de cotización en HTTP 503.
+
+### Ejecutar desde IntelliJ
+
+Ejecutar todos los tests del paquete:
+
+```text
+com.diplomatura.apifintech
+```
+
+La configuración debe incluir los subpaquetes y la variable
+`DB_PASSWORD`.
+
+### Ejecutar desde PowerShell
+
+Con MySQL iniciado y `DB_PASSWORD` configurada en esa terminal:
 
 ```powershell
 .\mvnw.cmd test
 ```
 
-También pueden ejecutarse desde IntelliJ.
+Para ejecutar la verificación de construcción:
 
-La suite actual contiene 18 tests:
-
-- 4 de lógica de cuentas.
-- 8 de CuentaService.
-- 4 de CotizacionService.
-- 1 del controlador de cotización y su respuesta 503.
-- 1 de carga del contexto de Spring.
+```powershell
+.\mvnw.cmd verify
+```
 
 Los tests de dominio, servicios y controlador no necesitan MySQL.
-El test de contexto sí utiliza la configuración de conexión:
-requiere MySQL iniciado y DB_PASSWORD disponible.
+El test de contexto sí utiliza la conexión configurada y puede
+actualizar el esquema con `ddl-auto=update`; no tiene una base aislada.
 
-El test de contexto utiliza la base configurada y puede actualizar su
-esquema; no configura una base aislada para pruebas.
-
-Los tests de cotización utilizan respuestas simuladas y no dependen
-de Internet ni de precios reales.
+Las pruebas de cotización utilizan respuestas simuladas y no necesitan
+Internet ni precios reales.
 
 ## Colección Postman
 
-Archivo:
+Archivo de entrega:
 
-`postman/fintech.postman_collection.json`
+```text
+postman/fintech.postman_collection.json
+```
 
-Importarlo en Postman. La colección utiliza:
+Importar el archivo en Postman. La colección se organiza en las carpetas:
+
+- Usuarios.
+- Cuentas.
+- Cotizaciones.
+
+Variable de colección:
 
 ```text
 baseUrl = http://localhost:8080
 ```
 
-Las solicitudes se organizan en Usuarios, Cuentas y Cotizaciones.
-Los nombres indican el código HTTP esperado.
+Los nombres de las solicitudes indican el código HTTP esperado.
 
-Los ejemplos de cuentas requieren un usuario existente. Adaptar su
-id cuando se utilice una base nueva.
+### Preparación de los datos
 
-Para repetir una creación exitosa de cuenta deben usarse CBU, alias
-y número disponibles. Reutilizar identificadores registrados produce
-409 Conflict.
+En una base nueva, crear primero un usuario y utilizar el id recibido
+en las solicitudes de cuentas.
+
+Las consultas de recursos existentes requieren que el id solicitado
+esté registrado.
+
+Para repetir una creación exitosa deben usarse CBU, alias y número
+disponibles. Reutilizar datos registrados produce 409 Conflict.
+
+En las pruebas de alias o número duplicado, los otros identificadores
+deben estar disponibles para que el rechazo corresponda al campo
+que se quiere comprobar.
+
+### Circuito de PUT y DELETE
+
+1. Crear una cuenta de prueba con saldo cero.
+2. Guardar el id recibido en la variable de colección `cuentaPruebaId`.
+3. Actualizar su alias y consultarla.
+4. Comprobar que conservar el alias propio devuelve 200.
+5. Probar alias ocupado, alias vacío y cuenta inexistente.
+6. Comprobar el rechazo al eliminar una cuenta con saldo.
+7. Eliminar la cuenta de prueba: debe devolver 204.
+8. Consultarla y repetir su eliminación: deben devolver 404.
+
+Al terminar el circuito, `cuentaPruebaId` identifica una cuenta eliminada.
+Para repetirlo, crear otra cuenta de prueba y actualizar la variable.
 
 ## Decisiones de diseño
 
-- Capas Controller, Service y Repository.
+- Separación de responsabilidades por capas.
 - Inyección de dependencias por constructor.
-- BigDecimal para representar importes.
-- Clase abstracta y polimorfismo para las reglas de cada tipo de cuenta.
-- Un solo titular por cuenta como simplificación del dominio.
+- Clase abstracta y polimorfismo para los tipos de cuenta.
+- Un titular por cuenta como simplificación del dominio.
+- `BigDecimal` para importes.
 - DTO de entrada y salida para cuentas.
-- Conversión a DTO dentro del servicio transaccional, conservando
-  la relación LAZY y open-in-view=false.
-- Manejo global de errores para mantener respuestas coherentes.
+- Conversión al DTO dentro de métodos transaccionales.
+- Relación con el titular configurada como LAZY.
+- `open-in-view=false`.
+- Excepciones específicas y manejo global con `ProblemDetail`.
+- Restricciones de unicidad en MySQL además de validaciones del servicio.
+- Actualización limitada al alias para preservar los demás datos.
+- Borrado físico permitido solamente con saldo cero.
+- Consulta externa con tiempos de espera y tratamiento específico de fallos.
 
-## Alcance y mejoras pendientes
+## Alcance
 
-Los depósitos y retiros están implementados como lógica del dominio;
-no se exponen mediante endpoints.
+Se implementaron los endpoints obligatorios y los bonus PUT y DELETE
+de cuentas.
 
-No se implementaron los bonus PUT y DELETE de cuentas.
+PUT permite actualizar el alias. DELETE elimina físicamente una cuenta
+únicamente cuando su saldo es cero.
 
-Como mejoras quedan la validación avanzada y unicidad de datos de
-usuarios, el control completo de precisión y rango de importes y las
-operaciones de transición entre estados de cuenta.
+Los depósitos y retiros están implementados como lógica del dominio
+y cubiertos por pruebas; no se exponen mediante endpoints.

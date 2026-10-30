@@ -365,6 +365,275 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Crear cuenta para bonus (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000030\",\r\n  \"alias\": \"bonus.original\",\r\n  \"cbu\": \"0000000000000000000030\",\r\n  \"saldoInicial\": 0.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar alias (200)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"alias\":\"bonus.actualizada\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar cuenta actualizada (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Conservar alias actual (200)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"alias\":\"bonus.actualizada\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar con alias ocupado (409)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"alias\":\"ana.ahorro.tp\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar con alias vacio (400)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"alias\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar cuenta inexistente (404)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"alias\":\"bonus.inexistente\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar cuenta con saldo (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar cuenta de prueba (204)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar cuenta eliminada (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar cuenta inexistente (404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar nuevamente (404)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{cuentaPruebaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{cuentaPruebaId}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -499,6 +768,10 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "cuentaPruebaId",
+      "value": "El id recibido al ejecutar Crear cuenta para bonus (201)"
     }
   ]
 }

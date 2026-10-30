@@ -25,4 +25,13 @@ public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
      * @return true si alguna cuenta tiene ese número
      */
     boolean existsByNumeroCuenta(String numeroCuenta);
+
+    /**
+     * Busca el alias excluyendo la cuenta que estamos actualizando.
+     *
+     * @param alias alias solicitado
+     * @param id identificador de la cuenta que debe excluirse
+     * @return true si otra cuenta tiene ese alias
+     */
+    boolean existsByAliasAndIdNot(String alias, Long id);
 }

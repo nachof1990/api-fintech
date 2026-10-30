@@ -105,4 +105,19 @@ public class ManejadorGlobalErrores {
                 excepcion.getMessage()
         );
     }
+    /**
+     * Informa el conflicto al intentar eliminar una cuenta con saldo.
+     *
+     * @param excepcion operación rechazada por la regla de saldo cero
+     * @return respuesta HTTP 409 con la explicación
+     */
+    @ExceptionHandler(CuentaConSaldoException.class)
+    public ProblemDetail manejarCuentaConSaldo(
+            CuentaConSaldoException excepcion) {
+
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                excepcion.getMessage()
+        );
+    }
 }

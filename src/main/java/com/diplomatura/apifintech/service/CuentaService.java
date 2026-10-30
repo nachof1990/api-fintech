@@ -1,30 +1,25 @@
 package com.diplomatura.apifintech.service;
 
-
 import com.diplomatura.apifintech.exception.CuentaNoEncontradaException;
 import com.diplomatura.apifintech.model.Cuenta;
 import com.diplomatura.apifintech.repository.CuentaRepository;
 import org.springframework.stereotype.Service;
-
-
 import java.util.List;
-
 import com.diplomatura.apifintech.dto.CrearCuentaRequest;
 import com.diplomatura.apifintech.model.Usuario;
-
 import com.diplomatura.apifintech.model.CajaDeAhorro;
 import com.diplomatura.apifintech.model.CuentaCorriente;
 import java.time.LocalDate;
-
 import org.springframework.transaction.annotation.Transactional;
 import com.diplomatura.apifintech.dto.CuentaResponse;
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
-
 import com.diplomatura.apifintech.exception.CbuDuplicadoException;
-
 import com.diplomatura.apifintech.exception.DatoCuentaDuplicadoException;
+import com.diplomatura.apifintech.dto.ActualizarCuentaRequest;
+import com.diplomatura.apifintech.exception.CuentaConSaldoException;
+
+
 /**
  * Coordina las consultas y la creación de cuentas.
  * Las operaciones de consulta usan transacciones de solo lectura.
@@ -64,20 +59,11 @@ public class CuentaService {
      *
      * @param id identificador de la cuenta; debe ser mayor que cero
      * @return respuesta con los datos de la cuenta encontrada
-     * @throws IllegalArgumentException si el id es nulo o no es positivo
+     * @throws IllegalArgumentException si el id es inválido
      * @throws CuentaNoEncontradaException si la cuenta no existe
      */
     public CuentaResponse obtenerCuentaPorId(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                    "El id de la cuenta debe ser mayor que cero"
-            );
-        }
-
-        Cuenta cuenta = cuentaRepository.findById(id)
-                .orElseThrow(() -> new CuentaNoEncontradaException(id));
-
-        return convertirARespuesta(cuenta);
+        return convertirARespuesta(buscarCuentaExistente(id));
     }
 
     /**
@@ -163,6 +149,83 @@ public class CuentaService {
         // Guarda la entidad y usa el resultado para construir la respuesta.
         Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
         return convertirARespuesta(cuentaGuardada);
+    }
+
+    /**
+     * Actualiza el alias de una cuenta existente.
+     *
+     * @param id identificador de la cuenta
+     * @param solicitud datos editables de la cuenta
+     * @return respuesta con el alias actualizado
+     * @throws IllegalArgumentException si el alias o el id son inválidos
+     * @throws CuentaNoEncontradaException si la cuenta no existe
+     * @throws DatoCuentaDuplicadoException si otra cuenta tiene el alias
+     */
+    @Transactional
+    public CuentaResponse actualizarCuenta(
+            Long id,
+            ActualizarCuentaRequest solicitud) {
+
+        if (solicitud == null
+                || solicitud.getAlias() == null
+                || solicitud.getAlias().isBlank()) {
+            throw new IllegalArgumentException("El alias es obligatorio");
+        }
+
+        Cuenta cuenta = buscarCuentaExistente(id);
+
+        // Excluye la propia cuenta para permitir conservar su alias.
+        if (cuentaRepository.existsByAliasAndIdNot(
+                solicitud.getAlias(), id)) {
+            throw new DatoCuentaDuplicadoException(
+                    "alias",
+                    solicitud.getAlias()
+            );
+        }
+
+        cuenta.setAlias(solicitud.getAlias());
+
+        Cuenta actualizada = cuentaRepository.save(cuenta);
+        return convertirARespuesta(actualizada);
+    }
+
+    /**
+     * Elimina físicamente una cuenta cuyo saldo sea cero.
+     *
+     * @param id identificador de la cuenta
+     * @throws IllegalArgumentException si el id es inválido
+     * @throws CuentaNoEncontradaException si la cuenta no existe
+     * @throws CuentaConSaldoException si el saldo no es cero
+     */
+    @Transactional
+    public void eliminarCuenta(Long id) {
+        Cuenta cuenta = buscarCuentaExistente(id);
+
+        // Rechaza tanto saldo positivo como deuda.
+        if (cuenta.getSaldo().compareTo(BigDecimal.ZERO) != 0) {
+            throw new CuentaConSaldoException(id);
+        }
+
+        cuentaRepository.delete(cuenta);
+    }
+
+    /**
+     * Centraliza la validación del id y la búsqueda de la entidad.
+     *
+     * @param id identificador solicitado
+     * @return entidad encontrada
+     * @throws IllegalArgumentException si el id es inválido
+     * @throws CuentaNoEncontradaException si no existe
+     */
+    private Cuenta buscarCuentaExistente(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "El id de la cuenta debe ser mayor que cero"
+            );
+        }
+
+        return cuentaRepository.findById(id)
+                .orElseThrow(() -> new CuentaNoEncontradaException(id));
     }
 
     /**
