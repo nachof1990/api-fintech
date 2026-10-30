@@ -1,0 +1,504 @@
+{
+  "info": {
+    "_postman_id": "dd59394a-4145-4d52-a31f-4449b16ef54b",
+    "name": "API Fintech",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8571464"
+  },
+  "item": [
+    {
+      "name": "Cuentas",
+      "item": [
+        {
+          "name": "Listar cuentas (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear caja de ahorro (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000001\",\r\n  \"alias\": \"ana.ahorro.tp\",\r\n  \"cbu\": \"0000000000000000000001\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar cuenta existente (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar cuenta inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar cuenta con id inválido (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "-1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta corriente (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CUENTA_CORRIENTE\",\r\n  \"numeroCuenta\": \"000002\",\r\n  \"alias\": \"ana.corriente.tp\",\r\n  \"cbu\": \"0000000000000000000002\",\r\n  \"saldoInicial\": 2000.00,\r\n  \"usuarioId\": 1,\r\n  \"limiteDescubierto\": 500.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con CBU inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000003\",\r\n  \"alias\": \"prueba.cbu.invalido\",\r\n  \"cbu\": \"123\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con usuario inexistente (404)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000003\",\r\n  \"alias\": \"prueba.usuario.inexistente\",\r\n  \"cbu\": \"0000000000000000000003\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 999999\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con saldo inicial negativo (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000003\",\r\n  \"alias\": \"prueba.saldo.negativo\",\r\n  \"cbu\": \"0000000000000000000003\",\r\n  \"saldoInicial\": -100.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear corriente con descubierto negativo (400)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CUENTA_CORRIENTE\",\r\n  \"numeroCuenta\": \"000003\",\r\n  \"alias\": \"prueba.descubierto.negativo\",\r\n  \"cbu\": \"0000000000000000000003\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1,\r\n  \"limiteDescubierto\": -500.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con CBU duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000010\",\r\n  \"alias\": \"prueba.cbu.duplicado\",\r\n  \"cbu\": \"0000000000000000000001\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con CBU nuevo (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000010\",\r\n  \"alias\": \"ana.ahorro.cbu.nuevo\",\r\n  \"cbu\": \"0000000000000000000010\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con alias duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000021\",\r\n  \"alias\": \"ana.ahorro.tp\",\r\n  \"cbu\": \"0000000000000000000021\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con numero duplicado (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000001\",\r\n  \"alias\": \"prueba.numero.duplicado\",\r\n  \"cbu\": \"0000000000000000000022\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear cuenta con identificadores nuevos (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipo\": \"CAJA_DE_AHORRO\",\r\n  \"numeroCuenta\": \"000011\",\r\n  \"alias\": \"ana.ahorro.once\",\r\n  \"cbu\": \"0000000000000000000011\",\r\n  \"saldoInicial\": 1000.00,\r\n  \"usuarioId\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cotizaciones",
+      "item": [
+        {
+          "name": "Consultar dolar oficial (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cotizaciones/dolar/oficial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cotizaciones",
+                "dolar",
+                "oficial"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuario existente (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuario inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuario con id invalido (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "-1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario (201)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Lucia\",\r\n  \"apellido\": \"Gomez\",\r\n  \"email\": \"lucia@example.com\",\r\n  \"dni\": \"34567890\",\r\n  \"fechaNacimiento\": \"1995-05-20\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
